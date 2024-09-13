@@ -5,10 +5,13 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "pip-app"
+name = "django-calendar"
 version = "0.1"
-description = "Template para Python Package"
-dependencies = []
+description = "Calendar with Django Models"
+dependencies = [
+    "Django>=5.1.1",
+    "python-dateutil>=2.9.0.post0",
+]
 readme = "README.md"
 requires-python = ">= 3.10"
 authors = [
@@ -30,4 +33,4 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/dudustefanello/pip_app/"
+Homepage = "https://github.com/dudustefanello/django_calendar/"

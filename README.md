@@ -1,2 +1,3 @@
-# pip_app
-Template para Python Package
+# django-calendar
+
+Calendar with Django Models
