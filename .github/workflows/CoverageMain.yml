@@ -44,16 +44,16 @@ jobs:
   
     - name: Exports coverage
       run: |
-        coverage html -d docs/django_financeiro/coverage --skip-empty --skip-covered
+        coverage html -d docs/django_calendar/coverage --skip-empty --skip-covered
 
     - name: Commit coverage results
       run: |
         cd docs/
-        rm django_financeiro/coverage/.gitignore -f
+        rm django_calendar/coverage/.gitignore -f
 
         git config --global user.email "eduardo@stefanello.cc"
         git config --global user.name "Eduardo Stefanello"
 
         git add .
-        git commit -m "Coverage results: django_financeiro"
+        git commit -m "Coverage results: django_calendar"
         git push
