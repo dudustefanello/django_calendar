@@ -11,8 +11,9 @@ class EventManager(CurrentSiteManager):
         result = {}
         for event in self.filter(calendar=calendar):
             lista = [date(d.year, d.month, d.day) for d in event.rrule.get_datetimes(
-                datahr.replace(hour=23, minute=59, tzinfo=event.dtstart.tzinfo)
+                event.dtstart.replace(hour=0, minute=0),
             )]
+
             data = date(datahr.year, datahr.month, datahr.day)
             if data in lista:
                 result.update({event.id: event.get_object(data)})
@@ -29,9 +30,15 @@ class RecurrencyRuleManager(CurrentSiteManager):
             fields.update({name.lower(): value})
 
         def get_freq():
-            if 'freq' not in fields:
-                raise AttributeError(_('Parâmetro obrigatório FREQ não informado'))
-            return fields['freq']
+            if fields['freq'] in ['DAILY', 'WEEKLY']:
+                return fields['freq']
+            if fields['freq'] == 'MONTHLY':
+                if 'byday' in fields:
+                    return 'MONTHDAY'
+                return 'MONTHLY'
+            if 'byday' in fields:
+                return 'YEARDAY'
+            return 'YEARLY'
 
         def get_repeat():
             if 'count' in fields:
@@ -49,36 +56,25 @@ class RecurrencyRuleManager(CurrentSiteManager):
             return None if not count else int(count)
 
         def get_byday():
-            if 'byday' in fields:
-                if fields['freq'] == 'DAILY':
-                    raise AttributeError(_('Parâmetro BYDAY não deve ser informado para frequência Diária'))
-
-                bw = bd = ''
-                for byday in fields['byday'].split(','):
-                    if byday.startswith('-1'):
-                        bw += ('' if bw == '' else ',') + byday[0:2]
-                        bd += ('' if bd == '' else ',') + byday[2:]
-                    elif byday[0].isdigit():
-                        bw += ('' if bw == '' else ',') + byday[0:1]
-                        bd += ('' if bd == '' else ',') + byday[1:]
-                    else:
-                        bw += ('' if bd == '' else ',') + ''
-                        bd += ('' if bd == '' else ',') + byday
-                return bw, bd
-            return None, None
+            if fields['freq'] == 'WEEKLY':
+                return fields.get('byday', None)
+            return None
 
         def get_bymonth():
-            if fields['freq'] != 'YEARLY' and 'bymonth' in fields:
-                raise AttributeError(_('Parâmetro BYMONTH só deve ser informado para frequência Anual'))
-            return fields.get('bymonth', None)
+            if fields['freq'] == 'YEARLY':
+                return fields.get('bymonth', None)
+            return None
+        
+        def get_bymonthdate():
+            if fields['freq'] in ['MONTHLY', 'YEARLY']:
+                return fields.get('bymonthday', None)
+            return None
 
         def get_bymonthday():
-            if (fields['freq'] == 'DAILY' or fields['freq'] == 'WEEKLY') and 'bymonthday' in fields:
-                raise AttributeError(_('Parâmetro BYMONTHDAY só deve ser informado para frequência Anual'))
-            bymonthday = fields.get('bymonthday', None)
-            return None if not bymonthday else int(bymonthday)
+            if fields['freq'] in ['MONTHLY', 'YEARLY']:
+                return fields.get('byday', None)
+            return None
 
-        byweek, byday = get_byday()
         return self.create(
             event=event,
             freq=get_freq(),
@@ -86,8 +82,8 @@ class RecurrencyRuleManager(CurrentSiteManager):
             repeat=get_repeat(),
             until=get_until(),
             count=get_count(),
-            byday=byday,
-            byweek=byweek,
+            byday=get_byday(),
             bymonth=get_bymonth(),
+            bymonthdate=get_bymonthdate(),
             bymonthday=get_bymonthday(),
         )
