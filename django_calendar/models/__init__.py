@@ -10,14 +10,32 @@ from django_calendar.models.mixins import BaseModel, DescriptionMixin, SiteMixin
 
 
 class Status(BaseModel, SummaryMixin):
+    color = models.CharField(
+        max_length=16, null=True, blank=True, choices=[
+            ('primary', 'primary'),
+            ('success', 'success'),
+            ('warning', 'warning'),
+            ('danger', 'danger'),
+            ('info', 'info')
+        ],
+    )
+
     class Meta(BaseModel.BaseMeta):
         verbose_name = _('situação')
         verbose_name_plural = _('situações')
 
 
 class Calendar(BaseModel, SummaryMixin):
-    uid = models.UUIDField(default=uuid.uuid4, unique=True, auto_created=True, editable=False,
-                           verbose_name=_('id único'))
+    uid = models.UUIDField(
+        default=uuid.uuid4, unique=True, auto_created=True, editable=False, verbose_name=_('id único'),
+    )
+
+    def event_list_by_date(self, date):
+        list_by_date = []
+        events = Event.objects.list_by_date(date, self)
+        for event in events:
+            list_by_date.append((event, events[event]))
+        return list_by_date
 
     class Meta(BaseModel.BaseMeta):
         verbose_name = _('calandário')
@@ -36,12 +54,11 @@ class Event(BaseModel, SummaryMixin, DescriptionMixin):
 
     def get_object(self, data):
         return {
-            'calendar': self.calendar,
             'uid': self.uid,
+            'summary': self.summary,
             'dtstart': self.dtstart.replace(year=data.year, month=data.month, day=data.day),
             'dtend': self.dtend.replace(year=data.year, month=data.month, day=data.day),
             'status': self.status,
-            'sequence': self.sequence,
         }
 
     class Meta(BaseModel.BaseMeta):

@@ -10,8 +10,9 @@ def get_site_id():
 
 
 class SiteMixin(models.Model):
-    site = models.ForeignKey(to=Site, on_delete=models.PROTECT, editable=False, default=get_site_id,
-                             verbose_name=_('site'))
+    site = models.ForeignKey(
+        to=Site, on_delete=models.PROTECT, editable=False, default=get_site_id, verbose_name=_('site'),
+    )
 
     objects = CurrentSiteManager()
 
