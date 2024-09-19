@@ -1,0 +1,59 @@
+name: CoverageMain
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  maincoverage:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.1.7
+
+    - name: Set up Python
+      uses: actions/setup-python@v5.2.0
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install --extra-index-url https://${{ secrets.PYPI_URL_USERNAME }}:${{ secrets.PYPI_URL_PASSWORD }}@pip.stefanello.cc/simple/ .
+
+    - name: Run coverage
+      run: |
+        pip install coverage
+        coverage run runtests.py
+
+    - name: Checkout docs
+      uses: actions/checkout@v4.1.7
+      with:
+        repository: dudustefanello/dudustefanello.github.io
+        path: docs
+        token: ${{ secrets.DOCS_TOKEN }}
+  
+    - name: Exports coverage
+      run: |
+        coverage html -d docs/django_calendar/coverage --skip-empty --skip-covered
+
+    - name: Commit coverage results
+      run: |
+        cd docs/
+        rm django_calendar/coverage/.gitignore -f
+
+        git config --global user.email "eduardo@stefanello.cc"
+        git config --global user.name "Eduardo Stefanello"
+
+        git add .
+        git commit -m "Coverage results: django_calendar"
+        git push

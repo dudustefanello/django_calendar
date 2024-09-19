@@ -7,9 +7,9 @@ from dateutil import parser
 
 class EventManager(CurrentSiteManager):
 
-    def list_by_date(self, datahr):
+    def list_by_date(self, datahr, calendar):
         result = {}
-        for event in self.all():
+        for event in self.filter(calendar=calendar):
             lista = [date(d.year, d.month, d.day) for d in event.rrule.get_datetimes(
                 datahr.replace(hour=23, minute=59, tzinfo=event.dtstart.tzinfo)
             )]
