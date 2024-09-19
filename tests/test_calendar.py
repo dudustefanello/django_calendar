@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 from django.test import TestCase
 
-from django_calendar.models import Calendar, Status, Event, RecurrencyRule
+from django_calendar.models import Calendar, Event, RecurrencyRule
 
 
 class CalendarTestCase(TestCase):
@@ -12,7 +12,6 @@ class CalendarTestCase(TestCase):
             end_time:   31/08/2024 11:00
         """
         self.calendar = Calendar.objects.create(summary='EventManagerTestCase')
-        self.status = Status.objects.create(summary='EventManagerTestCase')
 
         self.start_time = datetime(2024, 9, 1, 10, 0)
         self.end_time = datetime(2024, 9, 1, 11, 0)
@@ -22,7 +21,6 @@ class CalendarTestCase(TestCase):
             summary='EventManagerTestCase',
             dtstart=self.start_time,
             dtend=self.end_time,
-            status=self.status,
         )
 
 

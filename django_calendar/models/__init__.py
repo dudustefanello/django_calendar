@@ -9,22 +9,6 @@ from django_calendar.models.managers import EventManager, RecurrencyRuleManager
 from django_calendar.models.mixins import BaseModel, DescriptionMixin, SiteMixin, SummaryMixin
 
 
-class Status(BaseModel, SummaryMixin):
-    color = models.CharField(
-        max_length=16, null=True, blank=True, choices=[
-            ('primary', 'primary'),
-            ('success', 'success'),
-            ('warning', 'warning'),
-            ('danger', 'danger'),
-            ('info', 'info')
-        ],
-    )
-
-    class Meta(BaseModel.BaseMeta):
-        verbose_name = _('situação')
-        verbose_name_plural = _('situações')
-
-
 class Calendar(BaseModel, SummaryMixin):
     uid = models.UUIDField(
         default=uuid.uuid4, unique=True, auto_created=True, editable=False, verbose_name=_('id único'),
@@ -47,7 +31,11 @@ class Event(BaseModel, SummaryMixin, DescriptionMixin):
     uid = models.UUIDField(default=uuid.uuid4, auto_created=True, editable=False, verbose_name=_('id único'))
     dtstart = models.DateTimeField(verbose_name=_('data e hora inicial'))
     dtend = models.DateTimeField(verbose_name=_('data e hora final'))
-    status = models.ForeignKey(to='calendar.Status', on_delete=models.DO_NOTHING)
+    status = models.CharField(max_length=12, default='CONFIRMED', choices=[
+        ('TENTATIVE', _('Tentativa')),
+        ('CONFIRMED', _('Confirmado')),
+        ('CANCELLED', _('Cancelado')),
+    ])
     sequence = models.PositiveSmallIntegerField(default=0, verbose_name=_('versão'))
 
     objects = EventManager()
