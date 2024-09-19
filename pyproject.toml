@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "django-calendar"
-version = "0.2"
+version = "0.3"
 description = "Calendar with Django Models"
 dependencies = [
     "Django>=5.1.1",

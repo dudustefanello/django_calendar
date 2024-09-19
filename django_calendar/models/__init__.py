@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from dateutil import rrule
 from django.db import models
@@ -7,22 +8,6 @@ from multiselectfield import MultiSelectField
 
 from django_calendar.models.managers import EventManager, RecurrencyRuleManager
 from django_calendar.models.mixins import BaseModel, DescriptionMixin, SiteMixin, SummaryMixin
-
-
-class Status(BaseModel, SummaryMixin):
-    color = models.CharField(
-        max_length=16, null=True, blank=True, choices=[
-            ('primary', 'primary'),
-            ('success', 'success'),
-            ('warning', 'warning'),
-            ('danger', 'danger'),
-            ('info', 'info')
-        ],
-    )
-
-    class Meta(BaseModel.BaseMeta):
-        verbose_name = _('situação')
-        verbose_name_plural = _('situações')
 
 
 class Calendar(BaseModel, SummaryMixin):
@@ -47,7 +32,11 @@ class Event(BaseModel, SummaryMixin, DescriptionMixin):
     uid = models.UUIDField(default=uuid.uuid4, auto_created=True, editable=False, verbose_name=_('id único'))
     dtstart = models.DateTimeField(verbose_name=_('data e hora inicial'))
     dtend = models.DateTimeField(verbose_name=_('data e hora final'))
-    status = models.ForeignKey(to='calendar.Status', on_delete=models.DO_NOTHING)
+    status = models.CharField(max_length=12, default='CONFIRMED', choices=[
+        ('TENTATIVE', _('Tentativa')),
+        ('CONFIRMED', _('Confirmado')),
+        ('CANCELLED', _('Cancelado')),
+    ])
     sequence = models.PositiveSmallIntegerField(default=0, verbose_name=_('versão'))
 
     objects = EventManager()
@@ -79,11 +68,13 @@ class RecurrencyRule(SiteMixin):
     event = models.OneToOneField(
         to='calendar.Event', on_delete=models.CASCADE, related_name='rrule', verbose_name=_('evento'),
     )
-    freq = models.CharField(max_length=7, choices=[
+    freq = models.CharField(max_length=8, choices=[
         ('DAILY', _('Diária')),
         ('WEEKLY', _('Semanal')),
-        ('MONTHLY', _('Mensal')),
-        ('YEARLY', _('Anual')),
+        ('MONTHLY', _('Mensal (data)')),
+        ('MONTHDAY', _('Mensal (mês)')),
+        ('YEARLY', _('Anual (data)')),
+        ('YEARDAY', _('Anual (mês)')),
     ], default='DAILY', verbose_name=_('frequência'))
     interval = models.PositiveSmallIntegerField(default=1, verbose_name=_('intervalo'))
     repeat = models.CharField(max_length=5, null=True, blank=True, choices=[
@@ -111,9 +102,6 @@ class RecurrencyRule(SiteMixin):
         ], verbose_name=_('dias da semana'),
         help_text=_('Utilizar para frequência "Semanal", "Mensal" ou "Anual".'),
     )
-    byweek = models.CharField(
-        max_length=20, null=True, blank=True, verbose_name=_('semana'), editable=False,
-    )
     bymonth = MultiSelectField(
         null=True, blank=True, choices=[
             ('1', _('Janeiro')),
@@ -131,52 +119,129 @@ class RecurrencyRule(SiteMixin):
         ], verbose_name=_('mês'),
         help_text=_('Utilizar para frequência "Anual".'),
     )
-    bymonthday = models.PositiveSmallIntegerField(null=True, blank=True, verbose_name=_('dia do mês'))
+    bymonthdate = MultiSelectField(
+        null=True, blank=True, choices=[
+            ('1', _('1')),
+            ('2', _('2')),
+            ('3', _('3')),
+            ('4', _('4')),
+            ('5', _('5')),
+            ('6', _('6')),
+            ('7', _('7')),
+            ('8', _('8')),
+            ('9', _('9')),
+            ('10', _('10')),
+            ('11', _('11')),
+            ('12', _('12')),
+            ('13', _('13')),
+            ('14', _('14')),
+            ('15', _('15')),
+            ('16', _('16')),
+            ('17', _('17')),
+            ('18', _('18')),
+            ('19', _('19')),
+            ('20', _('20')),
+            ('21', _('21')),
+            ('22', _('22')),
+            ('23', _('23')),
+            ('24', _('24')),
+            ('25', _('25')),
+            ('26', _('26')),
+            ('27', _('27')),
+            ('28', _('28')),
+            ('29', _('29')),
+            ('30', _('30')),
+            ('31', _('31')),
+        ], verbose_name=_('data do mês'),
+    )
+    bymonthday = MultiSelectField(
+        null=True, blank=True, choices=[
+            ('1SU', _('1º Domingo')),
+            ('1MO', _('1ª Segunda')),
+            ('1TU', _('1ª Terça')),
+            ('1WE', _('1ª Quarta')),
+            ('1TH', _('1ª Quinta')),
+            ('1FR', _('1ª Sexta')),
+            ('1SA', _('1º Sábado')),
+            ('2SU', _('2º Domingo')),
+            ('2MO', _('2ª Segunda')),
+            ('2TU', _('2ª Terça')),
+            ('2WE', _('2ª Quarta')),
+            ('2TH', _('2ª Quinta')),
+            ('2FR', _('2ª Sexta')),
+            ('2SA', _('2º Sábado')),
+            ('3SU', _('3º Domingo')),
+            ('3MO', _('3ª Segunda')),
+            ('3TU', _('3ª Terça')),
+            ('3WE', _('3ª Quarta')),
+            ('3TH', _('3ª Quinta')),
+            ('3FR', _('3ª Sexta')),
+            ('3SA', _('3º Sábado')),
+            ('4SU', _('4º Domingo')),
+            ('4MO', _('4ª Segunda')),
+            ('4TU', _('4ª Terça')),
+            ('4WE', _('4ª Quarta')),
+            ('4TH', _('4ª Quinta')),
+            ('4FR', _('4ª Sexta')),
+            ('4SA', _('4º Sábado')),
+            ('5SU', _('5º Domingo')),
+            ('5MO', _('5ª Segunda')),
+            ('5TU', _('5ª Terça')),
+            ('5WE', _('5ª Quarta')),
+            ('5TH', _('5ª Quinta')),
+            ('5FR', _('5ª Sexta')),
+            ('5SA', _('5º Sábado')),
+            ('1SU', _('Último Domingo')),
+            ('1MO', _('Última Segunda')),
+            ('1TU', _('Última Terça')),
+            ('1WE', _('Última Quarta')),
+            ('1TH', _('Última Quinta')),
+            ('1FR', _('Última Sexta')),
+            ('1SA', _('Último Sábado')),
+        ], verbose_name=_('dia do mês'),
+    )
 
     objects = RecurrencyRuleManager()
 
-    def get_freq(self):
-        if self.freq == 'DAILY': return rrule.DAILY
-        if self.freq == 'WEEKLY': return rrule.WEEKLY
-        if self.freq == 'MONTHLY': return rrule.MONTHLY
-        if self.freq == 'YEARLY': return rrule.YEARLY
+    def get_datetimes(self, dtstart):
+        return rrule.rrulestr(self.get_rule_string(), dtstart=dtstart)
+    
+    def get_rule_string(self):
+        rrule = 'RRULE:'
 
-    def get_byday(self):
-        byday = []
-        if 'SU' in self.byday: byday.append(rrule.SU)
-        if 'MO' in self.byday: byday.append(rrule.MO)
-        if 'TU' in self.byday: byday.append(rrule.TU)
-        if 'WE' in self.byday: byday.append(rrule.WE)
-        if 'TH' in self.byday: byday.append(rrule.TH)
-        if 'FR' in self.byday: byday.append(rrule.FR)
-        if 'SA' in self.byday: byday.append(rrule.SA)
-        return byday
+        match self.freq:
+            case 'DAILY':
+                rrule += 'FREQ=DAILY;INTERVAL={}'.format(self.interval)
+            case 'WEEKLY':
+                rrule += 'FREQ=WEEKLY;INTERVAL={}'.format(self.interval)
+                if self.byday:
+                    rrule += ';BYDAY={}'.format(','.join(self.byday))
+            case 'MONTHLY':
+                rrule += 'FREQ=MONTHLY;INTERVAL={}'.format(self.interval)
+                if self.bymonthdate:
+                    rrule += ';BYMONTHDAY={}'.format(','.join(self.bymonthdate))
+            case 'MONTHDAY':
+                rrule += 'FREQ=MONTHLY;INTERVAL={}'.format(self.interval)
+                if self.bymonthday:
+                    rrule += ';BYDAY={}'.format(','.join(self.bymonthday))
+            case 'YEARLY':
+                rrule += 'FREQ=YEARLY;INTERVAL={};BYMONTH={}'.format(self.interval, ','.join(self.bymonth), self.bymonthdate)
+                if self.bymonthdate:
+                    rrule += ';BYMONTHDAY={}'.format(','.join(self.bymonthdate))
+            case 'YEARDAY':
+                rrule += 'FREQ=YEARLY;INTERVAL={};BYMONTH={}'.format(self.interval, ','.join(self.bymonth), self.bymonthday)
+                if self.bymonthday:
+                    rrule += ';BYDAY={}'.format(','.join(self.bymonthday))
 
-    def get_byweek(self):
-        if not self.byweek:
-            return None
-        byweek = []
-        bw = self.byweek.split(',')
-        if '1' in bw: byweek.append(1)
-        if '2' in bw: byweek.append(2)
-        if '3' in bw: byweek.append(3)
-        if '4' in bw: byweek.append(4)
-        if '5' in bw: byweek.append(5)
-        if '-1' in bw: byweek.append(-1)
-        return byweek
+        match self.repeat:
+            case 'UNTIL':
+                rrule += ';UNTIL={}'.format(self.until.isoformat().replace('-', '').replace(':', '')[0:15] + 'Z')
+            case 'COUNT':
+                rrule += ';COUNT={}'.format(self.count)
+            case None:
+                rrule += ';COUNT={}'.format(10000)
 
-    def get_datetimes(self, until=None):
-        return rrule.rrule(
-            freq=self.get_freq(),
-            dtstart=self.event.dtstart,
-            interval=self.interval,
-            count=self.count if self.count else 3650,
-            until=self.until if self.until else until,
-            bymonth=self.bymonth,
-            bymonthday=self.bymonthday,
-            byweekday=self.get_byday(),
-            bysetpos=self.get_byweek(),
-        )
+        return rrule
 
     def __str__(self):
         return self.event.summary
