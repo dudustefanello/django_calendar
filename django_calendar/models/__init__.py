@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime
 
 from dateutil import rrule
 from django.db import models

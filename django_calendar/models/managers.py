@@ -1,7 +1,6 @@
 from datetime import date
 
 from django.contrib.sites.managers import CurrentSiteManager
-from django.utils.translation import gettext_lazy as _
 from dateutil import parser
 
 
@@ -9,11 +8,9 @@ class EventManager(CurrentSiteManager):
 
     def list_by_date(self, datahr, calendar):
         result = {}
-        for event in self.filter(calendar=calendar):
-            lista = [date(d.year, d.month, d.day) for d in event.rrule.get_datetimes(
-                event.dtstart.replace(hour=0, minute=0),
-            )]
-
+        for event in self.filter(calendar=calendar).order_by('dtstart'):
+            datetimes = event.rrule.get_datetimes(event.dtstart.replace(hour=0, minute=0))
+            lista = [date(d.year, d.month, d.day) for d in datetimes]
             data = date(datahr.year, datahr.month, datahr.day)
             if data in lista:
                 result.update({event.id: event.get_object(data)})
