@@ -3,6 +3,7 @@ from datetime import date
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.sites.managers import CurrentSiteManager
 from dateutil import parser
+from django.utils.timezone import localtime
 
 
 class EventManager(CurrentSiteManager):
@@ -17,7 +18,13 @@ class EventManager(CurrentSiteManager):
                 if data in lista:
                     result.update({event.id: event.get_object(data)})
             except ObjectDoesNotExist:
-                result.update({event.id: event.get_object(event.dtstart.replace(hour=0, minute=0))})
+                dtstart = localtime(event.dtstart)
+                if (
+                    dtstart.year == datahr.year
+                    and dtstart.month == datahr.month
+                    and dtstart.day == datahr.day
+                ):
+                    result.update({event.id: event.get_object(event.dtstart.replace(hour=0, minute=0))})
         return result
 
 
