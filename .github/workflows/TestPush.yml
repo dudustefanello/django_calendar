@@ -1,4 +1,4 @@
-name: TestPushes
+name: TestPush
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  test-pushes:
+  test-push:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
