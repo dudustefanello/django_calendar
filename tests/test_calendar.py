@@ -35,9 +35,9 @@ class EventManagerTestCase(CalendarTestCase):
     def test_list_by_date_a(self):
         rrule = 'FREQ=DAILY;INTERVAL=1'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 1), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 2), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 3), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 1), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 2), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 3), self.calendar)])
 
         self.assertIn(self.event.id, [i[0] for i in self.calendar.event_list_by_date(datetime(2024, 9, 4))])
         self.assertIn(self.event.id, [i[0] for i in self.calendar.event_list_by_date(datetime(2024, 9, 5))])
@@ -46,9 +46,9 @@ class EventManagerTestCase(CalendarTestCase):
     def test_list_by_date_b(self):
         rrule = 'FREQ=DAILY;INTERVAL=2;UNTIL=20240927T130000Z'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 1), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 24), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 25), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 1), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 24), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 25), self.calendar)])
 
         self.assertIn(self.event.id, [i[0] for i in self.calendar.event_list_by_date(datetime(2024, 9, 27))])
         self.assertNotIn(self.event.id, [i[0] for i in self.calendar.event_list_by_date(datetime(2024, 9, 28))])
@@ -56,65 +56,95 @@ class EventManagerTestCase(CalendarTestCase):
 
     def test_list_by_date_c(self):
         rrule = 'FREQ=WEEKLY;INTERVAL=1;BYDAY=SU;COUNT=10'
-        rec = RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 8), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 16), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 22), self.calendar))
+        RecurrencyRule.objects.create_by_rrule(self.event, rrule)
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 8), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 16), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 22), self.calendar)])
 
     def test_list_by_date_d(self):
         rrule = 'FREQ=WEEKLY;INTERVAL=1;BYDAY=MO'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
         data = datetime(2024, 9, 23)
         lista = Event.objects.list_by_date(data, self.calendar)
-        self.assertIn(self.event.id, lista)
-        self.assertEqual(lista[self.event.id]['dtstart'].month, data.month)
-        self.assertEqual(lista[self.event.id]['dtstart'].day, data.day)
+        self.assertIn(self.event.id, [i[0] for i in lista])
+        self.assertEqual(lista[0][1]['dtstart'].month, data.month)
+        self.assertEqual(lista[0][1]['dtstart'].day, data.day)
 
     def test_list_by_date_e(self):
         rrule = 'FREQ=MONTHLY;BYDAY=1SA'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 7), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 7), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 5), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 12), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 7), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 7), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 5), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 12), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar)])
 
     def test_list_by_date_f(self):
         rrule = 'FREQ=MONTHLY;BYDAY=1SU'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
 
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 6), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 11, 3), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 12, 1), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 6), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 11, 3), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 12, 1), self.calendar)])
 
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 20), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 11, 10), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 12, 15), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 12, 29), self.calendar))
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 20), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 11, 10), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 12, 15), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 12, 29), self.calendar)])
 
     def test_list_by_date_g(self):
         rrule = 'FREQ=YEARLY;INTERVAL=1;BYMONTH=8;BYDAY=3TH;COUNT=5'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2025, 8, 21), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2026, 8, 20), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2027, 8, 19), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2028, 8, 17), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2029, 8, 31), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2025, 8, 21), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2026, 8, 20), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2027, 8, 19), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2028, 8, 17), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2029, 8, 31), self.calendar)])
 
     def test_list_by_date_h(self):
         rrule = 'FREQ=MONTHLY;INTERVAL=1;BYMONTHDAY=19;COUNT=4'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 9, 19), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2024, 11, 20), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 19), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 11, 20), self.calendar)])
 
     def test_list_by_date_i(self):
         rrule = 'FREQ=YEARLY;INTERVAL=2;BYMONTH=10;BYMONTHDAY=19;COUNT=6'
         RecurrencyRule.objects.create_by_rrule(self.event, rrule)
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2025, 10, 19), self.calendar))
-        self.assertIn(self.event.id, Event.objects.list_by_date(datetime(2026, 10, 19), self.calendar))
-        self.assertNotIn(self.event.id, Event.objects.list_by_date(datetime(2027, 10, 19), self.calendar))
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 10, 19), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2025, 10, 19), self.calendar)])
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2026, 10, 19), self.calendar)])
+        self.assertNotIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2027, 10, 19), self.calendar)])
+
+    def test_list_by_date_j(self):
+        self.assertIn(self.event.id, [i[0] for i in Event.objects.list_by_date(datetime(2024, 9, 1), self.calendar)])
+
+    def test_list_by_date_lambda(self):
+        event1 = Event.objects.create(
+            calendar=self.calendar,
+            summary='EventManagerTestCase1',
+            dtstart=datetime(2024, 9, 1, 10, 0),
+            dtend=datetime(2024, 9, 1, 11, 0),
+        )
+        event2 = Event.objects.create(
+            calendar=self.calendar,
+            summary='EventManagerTestCase1',
+            dtstart=datetime(2024, 9, 2, 8, 0),
+            dtend=datetime(2024, 9, 2, 9, 0),
+        )
+        rrule = 'FREQ=DAILY;INTERVAL=1;COUNT=5'
+        RecurrencyRule.objects.create_by_rrule(event1, rrule)
+        RecurrencyRule.objects.create_by_rrule(event2, rrule)
+
+        lista = Event.objects.list_by_date(datetime(2024, 9, 4), self.calendar)
+
+        self.assertIn(event1.id, [i[0] for i in lista])
+        self.assertIn(event2.id, [i[0] for i in lista])
+
+        self.assertEqual(lista[0][0], event2.id)
+        self.assertEqual(lista[1][0], event1.id)
+
+
 
 
 class RecurrencyRuleManagerTestCase(CalendarTestCase):
