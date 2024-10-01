@@ -5,8 +5,12 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    reviewers:
+    - "dudustefanello"
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: monthly
+    reviewers:
+    - "dudustefanello"
