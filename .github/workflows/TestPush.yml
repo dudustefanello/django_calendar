@@ -1,16 +1,15 @@
-name: TestPushes
+name: TestPush
 
 on:
   push:
     branches-ignore: [main]
-    paths:
-      - '**.py'
+    paths: ['**.py']
 
 permissions:
   contents: read
 
 jobs:
-  test-pushes:
+  test-push:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

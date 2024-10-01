@@ -3,6 +3,7 @@ name: CoverageMain
 on:
   push:
     branches: [main]
+    paths: ['**.py']
 
 permissions:
   contents: read
