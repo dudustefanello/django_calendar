@@ -18,7 +18,7 @@ class Calendar(BaseModel, SummaryMixin):
         list_by_date = []
         events = Event.objects.list_by_date(date, self)
         for event in events:
-            list_by_date.append((event, events[event]))
+            list_by_date.append((event[0], event[1]))
         return list_by_date
 
     class Meta(BaseModel.BaseMeta):
