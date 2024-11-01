@@ -45,7 +45,7 @@ jobs:
         echo "</code></pre></details>" >> coverage.md
 
     - name: Comment coverage results
-      uses: thollander/actions-comment-pull-request@v2.5.0
+      uses: thollander/actions-comment-pull-request@v3.0.0
       with:
         filePath: ./coverage.md
         comment_tag: coverage.md
