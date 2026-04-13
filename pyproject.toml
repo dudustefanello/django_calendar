@@ -9,7 +9,7 @@ name = "django-calendar"
 version = "1.0.0"
 description = "Calendar with Django Models"
 dependencies = [
-    "Django>=5.1.1",
+    "Django>=5.2.13",
     "python-dateutil>=2.9.0.post0",
     "django-multiselectfield>=0.1.13",
 ]
